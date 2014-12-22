@@ -1,0 +1,14 @@
+select conv1.typeName, 
+    grp.groupname as `shipGroup`,
+    mrk.marketgroupname as `shipRace`,
+    IF(dgm.attributeid = 211, "Gravimetric",
+    IF(dgm.attributeid = 210, "Magnetometric",
+    IF(dgm.attributeid = 209, "Ladar",
+    IF(dgm.attributeid = 208, "Radar","ERROR")))) as `sensorType`,
+    coalesce(dgm.valueint,dgm.valuefloat,NULL) as `sensorStrength`
+FROM invtypes conv1
+JOIN invmarketgroups mrk on (conv1.marketgroupid = mrk.marketgroupid)
+JOIN invgroups grp on (conv1.groupid = grp.groupid)
+JOIN dgmtypeattributes dgm on (dgm.typeid = conv1.typeid and attributeid in (208,209,210,211))
+WHERE grp.categoryid = 6
+AND coalesce(dgm.valueint,dgm.valuefloat,NULL)>0
